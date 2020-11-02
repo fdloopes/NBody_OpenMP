@@ -31,6 +31,7 @@ void calculate_force(Particle* this_particle1, Particle* this_particle2,
 }
 
 void nbody(Particle* d_particles, Particle *output) {
+
 	for(int id=0; id<number_of_particles; id++) {
 		Particle* this_particle = &output[id];
 
@@ -74,15 +75,17 @@ void nbody(Particle* d_particles, Particle *output) {
 
 /* main */
 int main (int argc, char** argv) {
-	if(argc < 2) {
-		std::cout << "Informe um arquivo com os parâmetros de entrada: ./nbody_simulation <input_file.in>\n";
+	if(argc < 3) {
+		std::cout << "Informe o numero de threads e um arquivo com os parâmetros de entrada: ./nbody_simulation <n_threads> <input_file.in>\n";
 		std::abort();
 	}
 
 	Particle* particle_array  = nullptr;
 	Particle* particle_array2 = nullptr;
 
-	FILE *input_data = fopen(argv[1], "r");
+	omp_set_num_threads(atoi(argv[1])); // Set number of threads
+
+	FILE *input_data = fopen(argv[2], "r");
 	Particle_input_arguments(input_data);
 
 	particle_array  = Particle_array_construct(number_of_particles);
@@ -92,18 +95,16 @@ int main (int argc, char** argv) {
 	printf("Processando simulação NBody....\n");
 
 	long start = wtime();
+
 	#pragma omp parallel
 	{
 		#pragma omp for
 		for(int timestep = 1; timestep <= number_of_timesteps; timestep++) {
-			#pragma omp task
 			nbody(particle_array, particle_array2);
-
 			/* swap arrays */
 			Particle * tmp = particle_array;
 			particle_array = particle_array2;
 			particle_array2 = tmp;
-			#pragma omp taskwait
 			printf("   Iteração %d OK\n", timestep);
 		}
 	}
