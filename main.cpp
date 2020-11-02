@@ -32,6 +32,9 @@ void calculate_force(Particle* this_particle1, Particle* this_particle2,
 
 void nbody(Particle* d_particles, Particle *output) {
 
+	#pragma omp parallel
+	{
+	#pragma omp for
 	for(int id=0; id<number_of_particles; id++) {
 		Particle* this_particle = &output[id];
 
@@ -42,7 +45,6 @@ void nbody(Particle* d_particles, Particle *output) {
 		for(i = 0; i < number_of_particles; i++) {
 			if(i != id) {
 				calculate_force(d_particles + id, d_particles + i, &force_x, &force_y, &force_z);
-
 				total_force_x += force_x;
 				total_force_y += force_y;
 				total_force_z += force_z;
@@ -69,6 +71,7 @@ void nbody(Particle* d_particles, Particle *output) {
 		this_particle->position_x = d_particles[id].position_x + position_change_x;
 		this_particle->position_y = d_particles[id].position_y + position_change_y;
 		this_particle->position_z = d_particles[id].position_z + position_change_z;
+	}
 	}
 }
 
