@@ -24,18 +24,6 @@ $(EXE): $(OBJ) $(OBJ_ROOT)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGSPARALLEL) -c $<
 
-threads_2:
-	export OMP_NUM_THREADS=2
-
-threads_4:
-	export OMP_NUM_THREADS=4
-
-threads_6:
-	export OMP_NUM_THREADS=6
-
-threads_8:
-	export OMP_NUM_THREADS=8
-
 clean:
 	rm -rf *.o $(EXE)
 
