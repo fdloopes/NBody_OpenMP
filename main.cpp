@@ -34,45 +34,45 @@ void nbody(Particle* d_particles, Particle *output) {
 
 	#pragma omp parallel
 	{
-	#pragma omp for nowait
-	for(int id=0; id<number_of_particles; id++) {
-		Particle* this_particle = &output[id];
+		#pragma omp for
+		for(int id=0; id<number_of_particles; id++) {
+			Particle* this_particle = &output[id];
 
-		float force_x = 0.0f, force_y = 0.0f, force_z = 0.0f;
-		float total_force_x = 0.0f, total_force_y = 0.0f, total_force_z = 0.0f;
+			float force_x = 0.0f, force_y = 0.0f, force_z = 0.0f;
+			float total_force_x = 0.0f, total_force_y = 0.0f, total_force_z = 0.0f;
 
-		int i;
-		#pragma omp task
-		for(i = 0; i < number_of_particles; i++) {
-			if(i != id) {
-				calculate_force(d_particles + id, d_particles + i, &force_x, &force_y, &force_z);
-				total_force_x += force_x;
-				total_force_y += force_y;
-				total_force_z += force_z;
+			int i;
+			#pragma omp task
+			for(i = 0; i < number_of_particles; i++) {
+				if(i != id) {
+					calculate_force(d_particles + id, d_particles + i, &force_x, &force_y, &force_z);
+					total_force_x += force_x;
+					total_force_y += force_y;
+					total_force_z += force_z;
+				}
 			}
+
+			float velocity_change_x, velocity_change_y, velocity_change_z;
+			float position_change_x, position_change_y, position_change_z;
+
+			this_particle->mass = d_particles[id].mass;
+
+			velocity_change_x = total_force_x * (time_interval / this_particle->mass);
+			velocity_change_y = total_force_y * (time_interval / this_particle->mass);
+			velocity_change_z = total_force_z * (time_interval / this_particle->mass);
+
+			position_change_x = d_particles[id].velocity_x + velocity_change_x * (0.5 * time_interval);
+			position_change_y = d_particles[id].velocity_y + velocity_change_y * (0.5 * time_interval);
+			position_change_z = d_particles[id].velocity_z + velocity_change_z * (0.5 * time_interval);
+
+			this_particle->velocity_x = d_particles[id].velocity_x + velocity_change_x;
+			this_particle->velocity_y = d_particles[id].velocity_y + velocity_change_y;
+			this_particle->velocity_z = d_particles[id].velocity_z + velocity_change_z;
+
+			this_particle->position_x = d_particles[id].position_x + position_change_x;
+			this_particle->position_y = d_particles[id].position_y + position_change_y;
+			this_particle->position_z = d_particles[id].position_z + position_change_z;
 		}
-
-		float velocity_change_x, velocity_change_y, velocity_change_z;
-		float position_change_x, position_change_y, position_change_z;
-
-		this_particle->mass = d_particles[id].mass;
-
-		velocity_change_x = total_force_x * (time_interval / this_particle->mass);
-		velocity_change_y = total_force_y * (time_interval / this_particle->mass);
-		velocity_change_z = total_force_z * (time_interval / this_particle->mass);
-
-		position_change_x = d_particles[id].velocity_x + velocity_change_x * (0.5 * time_interval);
-		position_change_y = d_particles[id].velocity_y + velocity_change_y * (0.5 * time_interval);
-		position_change_z = d_particles[id].velocity_z + velocity_change_z * (0.5 * time_interval);
-
-		this_particle->velocity_x = d_particles[id].velocity_x + velocity_change_x;
-		this_particle->velocity_y = d_particles[id].velocity_y + velocity_change_y;
-		this_particle->velocity_z = d_particles[id].velocity_z + velocity_change_z;
-
-		this_particle->position_x = d_particles[id].position_x + position_change_x;
-		this_particle->position_y = d_particles[id].position_y + position_change_y;
-		this_particle->position_z = d_particles[id].position_z + position_change_z;
-	}
 	}
 }
 
@@ -120,6 +120,7 @@ int main (int argc, char** argv) {
 	printf("Nro. de Partículas: %d\n", number_of_particles);
 	printf("Nro. de Iterações: %d\n", number_of_timesteps);
 	printf("Tempo: %.8f segundos\n", time);
+
 
 #ifdef VERBOSE
 	//Imprimir saída para arquivo
