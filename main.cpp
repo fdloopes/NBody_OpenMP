@@ -42,15 +42,18 @@ void nbody(Particle* d_particles, Particle *output) {
 			float total_force_x = 0.0f, total_force_y = 0.0f, total_force_z = 0.0f;
 
 			int i;
+
 			#pragma omp task
-			for(i = 0; i < number_of_particles; i++) {
-				if(i != id) {
-					calculate_force(d_particles + id, d_particles + i, &force_x, &force_y, &force_z);
-					total_force_x += force_x;
-					total_force_y += force_y;
-					total_force_z += force_z;
+				for(i = 0; i < number_of_particles; i++) {
+					if(i != id) {
+						calculate_force(d_particles + id, d_particles + i, &force_x, &force_y, &force_z);
+						total_force_x += force_x;
+						total_force_y += force_y;
+						total_force_z += force_z;
+					}
 				}
-			}
+			#pragma omp taskwait
+
 
 			float velocity_change_x, velocity_change_y, velocity_change_z;
 			float position_change_x, position_change_y, position_change_z;
@@ -100,18 +103,14 @@ int main (int argc, char** argv) {
 
 	long start = wtime();
 
-	//#pragma omp parallel
-	//{
-		//#pragma omp for
-		for(int timestep = 1; timestep <= number_of_timesteps; timestep++) {
-			nbody(particle_array, particle_array2);
-			/* swap arrays */
-			Particle * tmp = particle_array;
-			particle_array = particle_array2;
-			particle_array2 = tmp;
-			printf("   Iteração %d OK\n", timestep);
-		}
-	//}
+	for(int timestep = 1; timestep <= number_of_timesteps; timestep++) {
+		nbody(particle_array, particle_array2);
+		/* swap arrays */
+		Particle * tmp = particle_array;
+		particle_array = particle_array2;
+		particle_array2 = tmp;
+		printf("   Iteração %d OK\n", timestep);
+	}
 
 	long end = wtime();
 	double time = (end - start) / 1000000.0;
