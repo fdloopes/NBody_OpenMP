@@ -28,7 +28,7 @@ void Particle_input_arguments(FILE *input) {
 	domain_size_y             = DEFAULT_DOMAIN_SIZE_Y;
 	domain_size_z             = DEFAULT_DOMAIN_SIZE_Z;
 	time_interval             = DEFAULT_TIME_INTERVAL;
-	number_of_timesteps       = DEFAULT_NUMBER_OF_PARTICLES;
+	number_of_timesteps       = DEFAULT_NUMBER_OF_TIMESTEPS;
 	timesteps_between_outputs = DEFAULT_TIMESTEPS_BETWEEN_OUTPUTS;
 	execute_serial            = DEFAULT_EXECUTE_SERIAL;
 	random_seed               = DEFAULT_RANDOM_SEED;
