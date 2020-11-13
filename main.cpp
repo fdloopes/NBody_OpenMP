@@ -103,6 +103,9 @@ int main (int argc, char** argv) {
 
 	long start = wtime();
 
+	#pragma omp parallel
+	{
+	#pragma omp for
 	for(int timestep = 1; timestep <= number_of_timesteps; timestep++) {
 		nbody(particle_array, particle_array2);
 		/* swap arrays */
@@ -111,7 +114,7 @@ int main (int argc, char** argv) {
 		particle_array2 = tmp;
 		printf("   Iteração %d OK\n", timestep);
 	}
-
+	}
 	long end = wtime();
 	double time = (end - start) / 1000000.0;
 
